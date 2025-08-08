@@ -26,6 +26,18 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Demo mode flag and in-memory storage
+let isDemoMode = false;
+const demoData = {
+  users: [],
+  pools: [],
+  maintenance: []
+};
+
+// Set demo mode flag
+app.locals.isDemoMode = false;
+app.locals.demoData = demoData;
+
 // Security middleware
 app.use(helmet());
 app.use(cors({
@@ -54,9 +66,14 @@ const connectDB = async () => {
     
     await mongoose.connect(mongoURI);
     console.log('📦 Connected to MongoDB');
+    return true;
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    process.exit(1);
+    console.warn('⚠️  MongoDB connection failed:', error.message);
+    console.log('🔄 Starting in demo mode without database...');
+    console.log('📝 To use full features, please install and start MongoDB:');
+    console.log('   sudo apt install mongodb-server');
+    console.log('   sudo service mongodb start');
+    return false;
   }
 };
 
@@ -88,12 +105,68 @@ app.use(errorHandler);
 
 // Start server
 const startServer = async () => {
-  await connectDB();
+  const isDbConnected = await connectDB();
+  
+  // Set demo mode if database is not connected
+  if (!isDbConnected) {
+    isDemoMode = true;
+    app.locals.isDemoMode = true;
+    
+    // Initialize demo data
+    demoData.users = [
+      {
+        _id: 'demo-user-1',
+        firstName: 'Demo',
+        lastName: 'User',
+        email: 'demo@vegaspoolcoaches.com',
+        role: 'customer',
+        isEmailVerified: true,
+        preferences: {
+          notifications: {
+            email: true,
+            sms: false,
+            maintenanceReminders: true,
+            chemicalAlerts: true
+          }
+        }
+      }
+    ];
+    
+    demoData.pools = [
+      {
+        _id: 'demo-pool-1',
+        name: 'Demo Pool',
+        owner: 'demo-user-1',
+        poolType: 'inground',
+        surfaceType: 'concrete',
+        dimensions: { length: 32, width: 16, volume: 20000 },
+        address: { city: 'Las Vegas', state: 'NV' },
+        waterChemistry: [
+          {
+            pH: 7.4,
+            chlorine: 2.2,
+            alkalinity: 100,
+            temperature: 78,
+            testedAt: new Date()
+          }
+        ],
+        needsAttention: false,
+        recommendations: []
+      }
+    ];
+  }
   
   app.listen(PORT, () => {
     console.log(`🚀 VegasPoolCoaches server running on port ${PORT}`);
     console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🌐 API available at: http://localhost:${PORT}/api`);
+    console.log(`🌐 Web interface: http://localhost:${PORT}`);
+    console.log(`🔌 API available at: http://localhost:${PORT}/api`);
+    
+    if (!isDbConnected) {
+      console.log(`⚠️  Running in DEMO MODE - some features may be limited`);
+      console.log(`💡 The web interface will still work for demonstration`);
+      console.log(`👤 Demo login: demo@vegaspoolcoaches.com / password: demo123`);
+    }
   });
 };
 

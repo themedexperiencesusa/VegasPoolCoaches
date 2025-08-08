@@ -115,6 +115,28 @@ router.post('/login', async (req, res, next) => {
 
     const { email, password } = value;
 
+    // Demo mode handling
+    if (req.app.locals.isDemoMode) {
+      if (email.toLowerCase() === 'demo@vegaspoolcoaches.com' && password === 'demo123') {
+        const demoUser = req.app.locals.demoData.users[0];
+        const token = 'demo-token-' + Date.now(); // Simple demo token
+        
+        return res.json({
+          success: true,
+          data: {
+            user: demoUser,
+            token,
+            message: 'Demo login successful'
+          }
+        });
+      } else {
+        return res.status(401).json({
+          success: false,
+          error: { message: 'Demo mode: Use demo@vegaspoolcoaches.com / demo123' }
+        });
+      }
+    }
+
     // Find user and include password for comparison
     const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     
@@ -200,6 +222,15 @@ router.post('/login', async (req, res, next) => {
 // @access  Private
 router.get('/me', authenticateToken, async (req, res, next) => {
   try {
+    // Demo mode handling
+    if (req.app.locals.isDemoMode) {
+      const demoUser = req.app.locals.demoData.users[0];
+      return res.json({
+        success: true,
+        data: { user: demoUser }
+      });
+    }
+
     const user = await User.findById(req.user._id).select('-password');
     
     res.json({

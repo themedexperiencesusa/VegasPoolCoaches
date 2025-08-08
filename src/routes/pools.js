@@ -67,6 +67,23 @@ router.get('/', authenticateToken, async (req, res, next) => {
   try {
     const { page = 1, limit = 10, poolType, status, search } = req.query;
     
+    // Demo mode handling
+    if (req.app.locals.isDemoMode) {
+      const demoPools = req.app.locals.demoData.pools;
+      return res.json({
+        success: true,
+        data: {
+          docs: demoPools,
+          totalDocs: demoPools.length,
+          limit: parseInt(limit),
+          page: parseInt(page),
+          totalPages: 1,
+          hasNextPage: false,
+          hasPrevPage: false
+        }
+      });
+    }
+    
     let query = {};
     
     // Filter based on user role

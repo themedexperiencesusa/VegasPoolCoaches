@@ -208,8 +208,8 @@ Format your response as a structured analysis with clear priorities and actionab
       success: true,
       data: {
         analysis: generateRuleBasedAnalysis(waterChemistry, symptoms),
-        source: 'rule-based-fallback',
-        error: 'AI service temporarily unavailable'
+        source: req.app.locals.isDemoMode ? 'rule-based-demo' : 'rule-based-fallback',
+        error: req.app.locals.isDemoMode ? 'Demo mode - using rule-based analysis' : 'AI service temporarily unavailable'
       }
     });
   }

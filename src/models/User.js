@@ -230,7 +230,7 @@ userSchema.methods.canAccessPool = function(poolId) {
 };
 
 // Indexes for better query performance
-userSchema.index({ email: 1 });
+// Note: email index is automatically created by 'unique: true'
 userSchema.index({ role: 1 });
 userSchema.index({ 'address.zipCode': 1 });
 userSchema.index({ isActive: 1 });

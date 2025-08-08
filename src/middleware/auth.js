@@ -14,6 +14,13 @@ export const authenticateToken = async (req, res, next) => {
       });
     }
 
+    // Demo mode handling
+    if (req.app.locals.isDemoMode && token.startsWith('demo-token-')) {
+      const demoUser = req.app.locals.demoData.users[0];
+      req.user = demoUser;
+      return next();
+    }
+
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
