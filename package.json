@@ -1,0 +1,61 @@
+{
+  "name": "vegas-pool-coaches",
+  "version": "1.0.0",
+  "description": "Pool Management Consulting With AI - Intelligent pool maintenance and consulting platform",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "build": "npm run build:client",
+    "build:client": "webpack --mode production",
+    "dev:client": "webpack serve --mode development"
+  },
+  "keywords": [
+    "pool",
+    "management",
+    "consulting",
+    "ai",
+    "water-chemistry",
+    "maintenance",
+    "automation"
+  ],
+  "author": "Themedexperiencesusa",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "joi": "^17.11.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.3",
+    "mongoose-paginate-v2": "^1.9.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.7",
+    "openai": "^4.20.1",
+    "sharp": "^0.33.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.5",
+    "@babel/preset-env": "^7.23.5",
+    "babel-loader": "^9.1.3",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.3",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "style-loader": "^3.3.3",
+    "supertest": "^6.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
