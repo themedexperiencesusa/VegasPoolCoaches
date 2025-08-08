@@ -12,6 +12,10 @@ import authRoutes from './routes/auth.js';
 import poolRoutes from './routes/pools.js';
 import consultingRoutes from './routes/consulting.js';
 import maintenanceRoutes from './routes/maintenance.js';
+import legalRoutes from './routes/legal.js';
+import assessmentRoutes from './routes/assessments.js';
+import affiliateRoutes from './routes/affiliates.js';
+import premiumRoutes from './routes/premium.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -82,6 +86,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/pools', poolRoutes);
 app.use('/api/consulting', consultingRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/legal', legalRoutes);
+app.use('/api/assessments', assessmentRoutes);
+app.use('/api/affiliates', affiliateRoutes);
+app.use('/api/premium', premiumRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
