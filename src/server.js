@@ -61,24 +61,62 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static files
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Connect to MongoDB
-const connectDB = async () => {
-  try {
-    const mongoURI = process.env.NODE_ENV === 'test' 
-      ? process.env.MONGODB_TEST_URI 
-      : process.env.MONGODB_URI;
-    
-    await mongoose.connect(mongoURI);
-    console.log('📦 Connected to MongoDB');
-    return true;
-  } catch (error) {
-    console.warn('⚠️  MongoDB connection failed:', error.message);
-    console.log('🔄 Starting in demo mode without database...');
-    console.log('📝 To use full features, please install and start MongoDB:');
-    console.log('   sudo apt install mongodb-server');
-    console.log('   sudo service mongodb start');
-    return false;
+// Connect to MongoDB with retry logic
+const connectDB = async (retries = 5, delay = 5000) => {
+  const mongoURI = process.env.NODE_ENV === 'test' 
+    ? process.env.MONGODB_TEST_URI 
+    : process.env.MONGODB_URI;
+  
+  // MongoDB connection options
+  const options = {
+    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    family: 4, // Use IPv4, skip trying IPv6
+    maxPoolSize: 10, // Maintain up to 10 socket connections
+    minPoolSize: 2, // Maintain at least 2 socket connections
+    retryWrites: true, // Retry failed writes
+    retryReads: true, // Retry failed reads
+  };
+
+  for (let i = 0; i < retries; i++) {
+    try {
+      await mongoose.connect(mongoURI, options);
+      console.log('📦 Connected to MongoDB');
+      console.log(`🔗 Connection pool: min ${options.minPoolSize}, max ${options.maxPoolSize}`);
+      
+      // Set up connection event handlers
+      mongoose.connection.on('error', (err) => {
+        console.error('❌ MongoDB connection error:', err.message);
+      });
+      
+      mongoose.connection.on('disconnected', () => {
+        console.warn('⚠️  MongoDB disconnected. Attempting to reconnect...');
+      });
+      
+      mongoose.connection.on('reconnected', () => {
+        console.log('✅ MongoDB reconnected successfully');
+      });
+      
+      return true;
+    } catch (error) {
+      console.warn(`⚠️  MongoDB connection attempt ${i + 1}/${retries} failed:`, error.message);
+      
+      if (i < retries - 1) {
+        console.log(`🔄 Retrying in ${delay / 1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else {
+        console.warn('❌ All MongoDB connection attempts failed');
+        console.log('🔄 Starting in demo mode without database...');
+        console.log('📝 To use full features, please install and start MongoDB:');
+        console.log('   sudo apt install mongodb-server');
+        console.log('   sudo service mongodb start');
+        console.log('📝 Or configure MONGODB_URI in your .env file');
+        return false;
+      }
+    }
   }
+  
+  return false;
 };
 
 // API Routes

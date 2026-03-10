@@ -7,11 +7,12 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://mongodb:27017/vegas-pool-coaches
+      - MONGODB_URI=mongodb://root:password123@mongodb:27017/vegas-pool-coaches?authSource=admin
       - JWT_SECRET=change-this-in-production
       - PORT=3000
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     volumes:
       - ./uploads:/app/uploads
       - ./logs:/app/logs
@@ -31,6 +32,12 @@ services:
     volumes:
       - mongodb_data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     networks:
       - pool-network
 
