@@ -63,8 +63,17 @@ A comprehensive pool management and consulting platform that combines intelligen
    # Using MongoDB service
    sudo systemctl start mongod
    
-   # Or using Docker
-   docker run -d -p 27017:27017 --name mongodb mongo:latest
+   # Or using Docker with authentication
+   docker run -d -p 27017:27017 --name mongodb \
+     -e MONGO_INITDB_ROOT_USERNAME=root \
+     -e MONGO_INITDB_ROOT_PASSWORD=password123 \
+     mongo:latest
+   
+   # Update .env with authenticated connection:
+   # MONGODB_URI=mongodb://root:password123@localhost:27017/vegas-pool-coaches?authSource=admin
+   
+   # Or using Docker Compose (recommended)
+   docker-compose up -d
    ```
 
 5. **Start the application**
